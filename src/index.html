@@ -1,0 +1,41 @@
+<!doctype html>
+
+<!--
+    Copyright © 2025 俞妹妹宇宙唯一老公 (hippyandy@proton.me)
+    Licensed under AGPL-3.0-or-later
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/agpl-3.0>.
+-->
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri App</title>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+
+  <body>
+    <main class="container">
+      <input type="button" id="change_language" class="button" value="切换至中文">
+      <input type="button" id="install-tauri-button" class="button" value="Set up the Tauri development environment">
+      <div><strong id="project-dir-name">Project Dir: </strong><span id="project-dir"></span></div>
+      <input type="button" id="create-project-button" class="button" value="Create new project">
+      <input type="button" id="open-project-button" class="button" value="Open project">
+      <input type="button" id="dev-button" class="button" value="dev">
+      <input type="button" id="build-button" class="button" value="build">
+    </main>
+  </body>
+</html>
