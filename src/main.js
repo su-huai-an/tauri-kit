@@ -59,6 +59,7 @@ let button_create_project;
 let button_open_project;
 
 function change_language(language_strs) {
+  invoke("change_language");
   button_change_language.value = LANGUAGE[language][0];
   button_install_tauri.value = LANGUAGE[language][1];
   strong_project_dir.textContent = LANGUAGE[language][2];

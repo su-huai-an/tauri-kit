@@ -34,8 +34,8 @@ const PATH_CANT_ACCESS: u8 = 1;
 Tauri Commands
 */
 #[tauri::command]
-unsafe fn change_language() {
-    LANGUAGE_INDEX = (LANGUAGE_INDEX+1)%2;
+fn change_language() {
+    unsafe {LANGUAGE_INDEX = (LANGUAGE_INDEX+1)%2;}
 }
 
 #[tauri::command]
@@ -67,7 +67,6 @@ fn install_tauri() {
 
 #[tauri::command]
 fn create_project(path_str: String) -> Option<u8> {
-    return Some(PATH_CANT_ACCESS);
     let mut path = Path::new(&path_str);
 
     if let Ok(path_exist) = path.try_exists() {
@@ -163,7 +162,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![hide_window, show_window, install_tauri, create_project, open_project, dev, build, info])
+        .invoke_handler(tauri::generate_handler![change_language, hide_window, show_window, install_tauri, create_project, open_project, dev, build, info])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
