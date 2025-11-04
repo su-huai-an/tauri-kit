@@ -19,28 +19,63 @@
 use std::process::Command;
 use std::path::Path;
 use std::env;
+use tauri::Manager;
 
+/*
+Consts & Statics
+*/
+const LANGUAGE: [&'static str;2] = ["Press Enter to exit...", "按回车键退出……"];
+static mut LANGUAGE_INDEX: usize = 0;
+
+const PATH_NOT_EXIST: u8 = 0;
+const PATH_CANT_ACCESS: u8 = 1;
 
 /*
 Tauri Commands
 */
-
 #[tauri::command]
-fn install_tauri() {
-    let args = ["-e", "bash", "-c", "sudo dnf update -y && sudo dnf install clang rustup rust cargo webkit2gtk4.1-devel openssl-devel curl wget file libappindicator-gtk3-devel librsvg2-devel -y && sudo dnf group install c-development -y && cargo install tauri-cli && cargo install create-tauri-app ; read -p '按回车键退出……'"];
-    Command::new("alacritty").args(&args).spawn().unwrap();
+unsafe fn change_language() {
+    LANGUAGE_INDEX = (LANGUAGE_INDEX+1)%2;
 }
 
 #[tauri::command]
-fn create_project(path_str: String) -> Option<String> {
+fn hide_window(app_handle: tauri::AppHandle) {
+    if let Some(window) = app_handle.get_webview_window("main") {
+        window.hide().unwrap();
+    }
+}
+
+#[tauri::command]
+fn show_window(app_handle: tauri::AppHandle) {
+    if let Some(window) = app_handle.get_webview_window("main") {
+        window.show().unwrap();
+    }
+}
+
+#[tauri::command]
+fn install_tauri() {
+    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
+    let script_str = format!("sudo dnf update -y && sudo dnf install clang rustup rust cargo webkit2gtk4.1-devel openssl-devel curl wget file libappindicator-gtk3-devel librsvg2-devel -y && sudo dnf group install c-development -y && cargo install tauri-cli && cargo install create-tauri-app ; read -p '{hold_str}'");
+    let args = ["-e", "bash", "-c", &script_str];
+    Command::new("alacritty")
+        .args(&args)
+        .spawn()
+        .unwrap()
+        .wait()
+        .unwrap();
+}
+
+#[tauri::command]
+fn create_project(path_str: String) -> Option<u8> {
+    return Some(PATH_CANT_ACCESS);
     let mut path = Path::new(&path_str);
 
     if let Ok(path_exist) = path.try_exists() {
         if !path_exist {
-            return Some(format!("路径'{}'不存在！", path_str));
+            return Some(PATH_NOT_EXIST);
         }
     } else {
-        return Some(format!("无法访问路径'{}'，可能是没有足够的权限。", path_str));
+        return Some(PATH_CANT_ACCESS);
     }
 
     if path.is_file() {
@@ -50,7 +85,12 @@ fn create_project(path_str: String) -> Option<String> {
     env::set_current_dir(path).unwrap();
 
     let args = ["-e", "bash", "-c", "cargo create-tauri-app"];
-    Command::new("alacritty").args(&args).spawn().unwrap();
+    Command::new("alacritty")
+        .args(&args)
+        .spawn()
+        .unwrap()
+        .wait()
+        .unwrap();
 
     None
 }
@@ -81,14 +121,41 @@ fn open_project(path: String) -> Option<String> {
 
 #[tauri::command]
 fn dev() {
-    let args = ["-e", "bash", "-c", "cargo tauri dev ; read -p '按回车键退出……'"];
-    Command::new("alacritty").args(&args).spawn().unwrap();
+    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
+    let script_str = format!("cargo tauri dev ; read -p '{hold_str}'");
+    let args = ["-e", "bash", "-c", &script_str];
+    Command::new("alacritty")
+        .args(&args)
+        .spawn()
+        .unwrap()
+        .wait()
+        .unwrap();
 }
 
 #[tauri::command]
 fn build() {
-    let args = ["-e", "bash", "-c", "cargo tauri build ; read -p '按回车键退出……'"];
-    Command::new("alacritty").args(&args).spawn().unwrap();
+    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
+    let script_str = format!("cargo tauri build ; read -p '{hold_str}'");
+    let args = ["-e", "bash", "-c", &script_str];
+    Command::new("alacritty")
+        .args(&args)
+        .spawn()
+        .unwrap()
+        .wait()
+        .unwrap();
+}
+
+#[tauri::command]
+fn info() {
+    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
+    let script_str = format!("cargo tauri info ; read -p '{hold_str}'");
+    let args = ["-e", "bash", "-c", &script_str];
+    Command::new("alacritty")
+        .args(&args)
+        .spawn()
+        .unwrap()
+        .wait()
+        .unwrap();
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -96,7 +163,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![install_tauri, create_project, open_project, dev, build])
+        .invoke_handler(tauri::generate_handler![hide_window, show_window, install_tauri, create_project, open_project, dev, build, info])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

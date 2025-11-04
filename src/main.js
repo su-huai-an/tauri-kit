@@ -27,8 +27,26 @@ const LANGUAGE = [["切换至中文",
   "Where would you like to create the new project?",
   "Project created successfully. Please open it manually.",
   "Not a Tauri project. Please choose a valid Tauri project directory.",
-  "Please open a project first!"],
-  ["Change language to English", "安装Tauri开发环境", "项目路径：", "创建新项目", "打开项目", "你想在哪里创建新项目？", "新项目创建完成，请手动打开它", "你所打开的路径不是Tauri项目路径，请重新选择！", "请先打开项目！"]];
+  "Please open a project first!",
+  "Unable to find path: '",
+  "'.",
+  "Unable to access path: '",
+  "'. You may not have the required permissions."],
+  ["Change language to English",
+  "安装Tauri开发环境",
+  "项目路径：",
+  "创建新项目",
+  "打开项目",
+  "你想在哪里创建新项目？",
+  "新项目创建完成，请手动打开它",
+  "你所打开的路径不是Tauri项目路径，请重新选择！",
+  "请先打开项目！",
+  "路径'",
+  "'不存在！",
+  "路径'",
+  "'无法访问，可能是权限不足！"]];
+  const PATH_NOT_EXIST = 0;
+  const PATH_CANT_ACCESS = 1;
 
 let language = 0;
 let inited = false;
@@ -49,34 +67,56 @@ function change_language(language_strs) {
 }
 
 async function install_tauri() {
-  invoke("install_tauri");
+  await invoke("hide_window");
+  await invoke("install_tauri");
+  invoke("show_window");
 }
 
 async function create_project() {
+  await invoke("hide_window");
   let path = await open({
     multiple: false,
     title: LANGUAGE[language][5],
     directory: true
   });
+  // when open dialog-box canceled
+  if (path === null) {
+    invoke("show_window");
+    return;
+  }
 
   let ret = await invoke("create_project", { "pathStr": path });
-  
+  invoke("show_window");
+
   if (ret === null) {
     inited = false;
     span_project_dir.textContent = LANGUAGE[language][6];
   } else {
-    alert(ret);
+    if (ret === PATH_NOT_EXIST) {
+      alert(LANGUAGE[language][9]+path+LANGUAGE[language][10]);
+    } else if (ret === PATH_CANT_ACCESS) {
+      alert(LANGUAGE[language][11]+path+LANGUAGE[language][12]);
+    }
   }
+
 }
 
 async function open_project() {
+  await invoke("hide_window");
   let path = await open({
     multiple: false,
     title: LANGUAGE[language][4],
     directory: true
   });
+  // when open dialog-box canceled
+  if (path===null) {
+    invoke("show_window");
+    return;
+  }
 
   let project_dir = await invoke("open_project", { "path": path });
+  invoke("show_window");
+
   if(project_dir !== null) {
     span_project_dir.textContent = project_dir;
     inited = true;
@@ -87,7 +127,9 @@ async function open_project() {
 
 async function dev() {
   if (inited) {
-    invoke("dev");
+    await invoke("hide_window");
+    await invoke("dev");
+    invoke("show_window");
   } else {
     alert(LANGUAGE[language][8]);
   }
@@ -95,14 +137,22 @@ async function dev() {
 
 async function build() {
   if (inited) {
-    invoke("build");
+    await invoke("hide_window");
+    await invoke("build");
+    invoke("show_window");
   } else {
     alert(LANGUAGE[language][8]);
   }
 }
 
+async function info() {
+  await invoke("hide_window");
+  await invoke("info");
+  invoke("show_window");
+}
+
 window.addEventListener("DOMContentLoaded", () => {
-  button_change_language = document.getElementById("change_language");
+  button_change_language = document.getElementById("change-language");
   button_change_language.addEventListener("click", (e) => {
     language = (language + 1) % 2;
     change_language(LANGUAGE[language]);
@@ -126,5 +176,8 @@ window.addEventListener("DOMContentLoaded", () => {
   });
   document.getElementById("build-button").addEventListener("click", (e) => {
     build();
+  });
+  document.getElementById("info-button").addEventListener("click", (e) => {
+    info();
   });
 });
