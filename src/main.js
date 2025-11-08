@@ -68,13 +68,10 @@ function change_language(language_strs) {
 }
 
 async function install_tauri() {
-  await invoke("hide_window");
   await invoke("install_tauri");
-  invoke("show_window");
 }
 
 async function create_project() {
-  await invoke("hide_window");
   let path = await open({
     multiple: false,
     title: LANGUAGE[language][5],
@@ -82,12 +79,10 @@ async function create_project() {
   });
   // when open dialog-box canceled
   if (path === null) {
-    invoke("show_window");
     return;
   }
 
   let ret = await invoke("create_project", { "pathStr": path });
-  invoke("show_window");
 
   if (ret === null) {
     inited = false;
@@ -103,7 +98,6 @@ async function create_project() {
 }
 
 async function open_project() {
-  await invoke("hide_window");
   let path = await open({
     multiple: false,
     title: LANGUAGE[language][4],
@@ -111,12 +105,10 @@ async function open_project() {
   });
   // when open dialog-box canceled
   if (path===null) {
-    invoke("show_window");
     return;
   }
 
   let project_dir = await invoke("open_project", { "path": path });
-  invoke("show_window");
 
   if(project_dir !== null) {
     span_project_dir.textContent = project_dir;
@@ -128,9 +120,7 @@ async function open_project() {
 
 async function dev() {
   if (inited) {
-    await invoke("hide_window");
     await invoke("dev");
-    invoke("show_window");
   } else {
     alert(LANGUAGE[language][8]);
   }
@@ -138,18 +128,14 @@ async function dev() {
 
 async function build() {
   if (inited) {
-    await invoke("hide_window");
     await invoke("build");
-    invoke("show_window");
   } else {
     alert(LANGUAGE[language][8]);
   }
 }
 
 async function info() {
-  await invoke("hide_window");
   await invoke("info");
-  invoke("show_window");
 }
 
 window.addEventListener("DOMContentLoaded", () => {

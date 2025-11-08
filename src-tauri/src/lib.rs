@@ -39,20 +39,6 @@ fn change_language() {
 }
 
 #[tauri::command]
-fn hide_window(app_handle: tauri::AppHandle) {
-    if let Some(window) = app_handle.get_webview_window("main") {
-        window.hide().unwrap();
-    }
-}
-
-#[tauri::command]
-fn show_window(app_handle: tauri::AppHandle) {
-    if let Some(window) = app_handle.get_webview_window("main") {
-        window.show().unwrap();
-    }
-}
-
-#[tauri::command]
 fn install_tauri() {
     let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
     let script_str = format!("sudo dnf update -y && sudo dnf install clang rustup webkit2gtk4.1-devel openssl-devel curl wget file libappindicator-gtk3-devel librsvg2-devel -y && sudo dnf group install c-development -y && rustup-init -y && . $HOME/.bashrc && cargo install tauri-cli && cargo install create-tauri-app ; read -p '{hold_str}'");
@@ -162,7 +148,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![change_language, hide_window, show_window, install_tauri, create_project, open_project, dev, build, info])
+        .invoke_handler(tauri::generate_handler![change_language, install_tauri, create_project, open_project, dev, build, info])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
