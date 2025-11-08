@@ -55,7 +55,7 @@ fn show_window(app_handle: tauri::AppHandle) {
 #[tauri::command]
 fn install_tauri() {
     let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
-    let script_str = format!("sudo dnf update -y && sudo dnf install clang rustup webkit2gtk4.1-devel openssl-devel curl wget file libappindicator-gtk3-devel librsvg2-devel -y && sudo dnf group install c-development -y && rustup-init && . $HOME/.bashrc && cargo install tauri-cli && cargo install create-tauri-app ; read -p '{hold_str}'");
+    let script_str = format!("sudo dnf update -y && sudo dnf install clang rustup webkit2gtk4.1-devel openssl-devel curl wget file libappindicator-gtk3-devel librsvg2-devel -y && sudo dnf group install c-development -y && rustup-init -y && . $HOME/.bashrc && cargo install tauri-cli && cargo install create-tauri-app ; read -p '{hold_str}'");
     let args = ["-e", "bash", "-c", &script_str];
     Command::new("alacritty")
         .args(&args)
