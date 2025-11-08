@@ -19,12 +19,20 @@
 use std::process::Command;
 use std::path::Path;
 use std::env;
-use tauri::Manager;
 
 /*
 Consts & Statics
 */
-const LANGUAGE: [[&'static str;2];2] = [["Multiple sudo password prompts will appear during installation. Please stay nearby to prevent timeout issues.", "Press Enter to exit..."], ["安装过程中需要多次输入sudo密码，请不要离开，以免安装因等待sudo密码超时而中断。", "按回车键退出……"]];
+const LANGUAGE: [[&'static str;2];2] = [
+    [
+        "Multiple sudo password prompts will appear during installation. Please stay nearby to prevent timeout issues.",
+        "Press Enter to exit..."
+    ],
+    [
+        "安装过程中需要多次输入sudo密码，请不要离开，以免安装因等待sudo密码超时而中断。",
+        "按回车键退出……"
+    ]
+];
 static mut LANGUAGE_INDEX: usize = 0;
 
 const PATH_NOT_EXIST: u8 = 0;
@@ -107,7 +115,7 @@ fn open_project(path: String) -> Option<String> {
 
 #[tauri::command]
 fn dev() {
-    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
+    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX][1] };
     let script_str = format!("cargo tauri dev ; read -p '{hold_str}'");
     let args = ["-e", "bash", "-c", &script_str];
     Command::new("alacritty")
@@ -120,7 +128,7 @@ fn dev() {
 
 #[tauri::command]
 fn build() {
-    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
+    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX][1] };
     let script_str = format!("cargo tauri build ; read -p '{hold_str}'");
     let args = ["-e", "bash", "-c", &script_str];
     Command::new("alacritty")
@@ -133,7 +141,7 @@ fn build() {
 
 #[tauri::command]
 fn info() {
-    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
+    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX][1] };
     let script_str = format!("cargo tauri info ; read -p '{hold_str}'");
     let args = ["-e", "bash", "-c", &script_str];
     Command::new("alacritty")
