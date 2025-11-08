@@ -24,7 +24,7 @@ use tauri::Manager;
 /*
 Consts & Statics
 */
-const LANGUAGE: [&'static str;2] = ["Press Enter to exit...", "按回车键退出……"];
+const LANGUAGE: [[&'static str;2];2] = [["Multiple sudo password prompts will appear during installation. Please stay nearby to prevent timeout issues.", "Press Enter to exit..."], ["安装过程中需要多次输入sudo密码，请不要离开，以免安装因等待sudo密码超时而中断。", "按回车键退出……"]];
 static mut LANGUAGE_INDEX: usize = 0;
 
 const PATH_NOT_EXIST: u8 = 0;
@@ -40,8 +40,9 @@ fn change_language() {
 
 #[tauri::command]
 fn install_tauri() {
-    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX] };
-    let script_str = format!("sudo dnf update -y && sudo dnf install clang rustup webkit2gtk4.1-devel openssl-devel curl wget file libappindicator-gtk3-devel librsvg2-devel -y && sudo dnf group install c-development -y && rustup-init -y && . $HOME/.bashrc && cargo install tauri-cli && cargo install create-tauri-app ; read -p '{hold_str}'");
+    let not_leave_str = unsafe{ LANGUAGE[LANGUAGE_INDEX][0] };
+    let hold_str = unsafe{ LANGUAGE[LANGUAGE_INDEX][1] };
+    let script_str = format!("echo '{not_leave_str}' ; sudo dnf update -y && sudo dnf install clang rustup webkit2gtk4.1-devel openssl-devel curl wget file libappindicator-gtk3-devel librsvg2-devel -y && sudo dnf group install c-development -y && rustup-init -y && . $HOME/.bashrc && cargo install tauri-cli && cargo install create-tauri-app ; read -p '{hold_str}'");
     let args = ["-e", "bash", "-c", &script_str];
     Command::new("alacritty")
         .args(&args)
