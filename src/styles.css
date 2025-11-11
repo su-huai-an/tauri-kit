@@ -34,7 +34,7 @@
   -webkit-text-size-adjust: 100%;
 }
 
-.container {
+.container-class {
   margin: 0;
   padding: 0;
   display: flex;
@@ -67,7 +67,7 @@ input {
   outline: none;
 }
 
-.button {
+.button-class {
   margin: 2px;
   cursor: pointer;
 }

@@ -18,153 +18,177 @@
 
 const { invoke } = window.__TAURI__.core;
 const { open } = window.__TAURI__.dialog;
+const { listen } = window.__TAURI__.event;
 
-const LANGUAGE = [["切换至中文",
-  "Set up the Tauri development environment",
-  "Project Dir: ",
-  "Create new project",
-  "Open project",
-  "Where would you like to create the new project?",
-  "Project created successfully. Please open it manually.",
-  "Not a Tauri project. Please choose a valid Tauri project directory.",
-  "Please open a project first!",
-  "Unable to find path: '",
-  "'.",
-  "Unable to access path: '",
-  "'. You may not have the required permissions."],
-  ["Change language to English",
-  "安装Tauri开发环境",
-  "项目路径：",
-  "创建新项目",
-  "打开项目",
-  "你想在哪里创建新项目？",
-  "新项目创建完成，请手动打开它",
-  "你所打开的路径不是Tauri项目路径，请重新选择！",
-  "请先打开项目！",
-  "路径'",
-  "'不存在！",
-  "路径'",
-  "'无法访问，可能是权限不足！"]];
-  const PATH_NOT_EXIST = 0;
-  const PATH_CANT_ACCESS = 1;
+const LANGUAGE_STRS = [
+  [
+    "切换至中文",//0
+    "Set up the Tauri development environment",//1
+    "Project Dir: ",//2
+    "Create new project",//3
+    "Open project",//4
+    "Where would you like to create the new project?",//5
+    "Project created successfully. Please open it manually.",//6
+    "Unable to find path: '",//7
+    "'.",//8
+    "Unable to access path: '",//9
+    "'. You may not have the required permissions.",//10
+    "Not a Tauri project. Please choose a valid Tauri project directory.",//11
+    "Please open a project first!"//12
+  ],
+  [
+    "Change language to English",//0
+    "安装Tauri开发环境",//1
+    "项目路径：",//2
+    "创建新项目",//3
+    "打开项目",//4
+    "你想在哪里创建新项目？",//5
+    "新项目创建完成，请手动打开它",//6
+    "路径'",//7
+    "'不存在！",//8
+    "路径'",//9
+    "'无法访问，可能是权限不足！",//10
+    "你所打开的路径不是Tauri项目路径，请重新选择！",//11
+    "请先打开项目！"//12
+  ]
+];
+const ERROR_PATH_NOT_EXIST = 0;
+const ERROR_PATH_CANT_ACCESS = 1;
 
-let language = 0;
-let inited = false;
+let languageIndex = 0;
+let projectOpened = false;
 
-let button_change_language;
-let button_install_tauri;
-let strong_project_dir;
-let span_project_dir;
-let button_create_project;
-let button_open_project;
+let containerMain;
+let changeLanguageButton;
+let installTauriButton;
+let projectDirStrong;
+let projectDirSpan;
+let createProjectButton;
+let openProjectButton;
 
-function change_language(language_strs) {
+async function changeLanguage() {
   invoke("change_language");
-  button_change_language.value = LANGUAGE[language][0];
-  button_install_tauri.value = LANGUAGE[language][1];
-  strong_project_dir.textContent = LANGUAGE[language][2];
-  button_create_project.value = LANGUAGE[language][3];
-  button_open_project.value = LANGUAGE[language][4];
+  languageIndex = (languageIndex + 1) % 2;
+  changeLanguageButton.value = LANGUAGE_STRS[languageIndex][0];
+  installTauriButton.value = LANGUAGE_STRS[languageIndex][1];
+  projectDirStrong.textContent = LANGUAGE_STRS[languageIndex][2];
+  createProjectButton.value = LANGUAGE_STRS[languageIndex][3];
+  openProjectButton.value = LANGUAGE_STRS[languageIndex][4];
 }
 
-async function install_tauri() {
-  await invoke("install_tauri");
+async function installTauri() {
+  containerMain.style.display = "none";
+  invoke("install_tauri");
 }
 
-async function create_project() {
+async function createProject() {
+  containerMain.style.display = "none";
   let path = await open({
     multiple: false,
-    title: LANGUAGE[language][5],
+    title: LANGUAGE_STRS[languageIndex][5],
     directory: true
   });
-  // when open dialog-box canceled
   if (path === null) {
-    return;
+    containerMain.style.display = "flex";
+    return; 
   }
 
   let ret = await invoke("create_project", { "pathStr": path });
-
   if (ret === null) {
-    inited = false;
-    span_project_dir.textContent = LANGUAGE[language][6];
+    projectOpened = false;
+    projectDirSpan.textContent = LANGUAGE_STRS[languageIndex][6];
   } else {
-    if (ret === PATH_NOT_EXIST) {
-      alert(LANGUAGE[language][9]+path+LANGUAGE[language][10]);
-    } else if (ret === PATH_CANT_ACCESS) {
-      alert(LANGUAGE[language][11]+path+LANGUAGE[language][12]);
+    if (ret === ERROR_PATH_NOT_EXIST) {
+      alert(LANGUAGE_STRS[languageIndex][7]+path+LANGUAGE_STRS[languageIndex][8]);
+    } else if (ret === ERROR_PATH_CANT_ACCESS) {
+      alert(LANGUAGE_STRS[languageIndex][9]+path+LANGUAGE_STRS[languageIndex][10]);
     }
   }
 
+  containerMain.style.display = "flex";
 }
 
-async function open_project() {
+async function openProject() {
+  containerMain.style.display = "none";
   let path = await open({
     multiple: false,
-    title: LANGUAGE[language][4],
+    title: LANGUAGE_STRS[languageIndex][4],
     directory: true
   });
-  // when open dialog-box canceled
-  if (path===null) {
-    return;
+  if (path===null) { 
+    containerMain.style.display = "flex";
+    return; 
   }
 
-  let project_dir = await invoke("open_project", { "path": path });
-
-  if(project_dir !== null) {
-    span_project_dir.textContent = project_dir;
-    inited = true;
+  let projectDir = await invoke("open_project", { "pathStr": path });
+  if (projectDir !== null) {
+    projectDirSpan.textContent = projectDir;
+    projectOpened = true;
   } else {
-    alert(LANGUAGE[language][7]);
+    alert(LANGUAGE_STRS[languageIndex][11]);
   }
+  containerMain.style.display = "flex";
 }
 
 async function dev() {
-  if (inited) {
-    await invoke("dev");
+  if (projectOpened) {
+    containerMain.style.display = "none";
+    invoke("dev");
   } else {
-    alert(LANGUAGE[language][8]);
+    alert(LANGUAGE_STRS[languageIndex][12]);
   }
 }
 
 async function build() {
-  if (inited) {
-    await invoke("build");
+  if(projectOpened) {
+    containerMain.style.display = "none";
+    invoke("build");
   } else {
-    alert(LANGUAGE[language][8]);
+    alert(LANGUAGE_STRS[languageIndex][12]);
   }
 }
 
 async function info() {
-  await invoke("info");
+  containerMain.style.display = "none";
+  invoke("info");
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  button_change_language = document.getElementById("change-language");
-  button_change_language.addEventListener("click", (e) => {
-    language = (language + 1) % 2;
-    change_language(LANGUAGE[language]);
+  containerMain = document.getElementById("container-main-id");
+  changeLanguageButton = document.getElementById("change-language-button-id");
+  changeLanguageButton.addEventListener("click", (e) => {
+    changeLanguage();
   });
-  strong_project_dir = document.getElementById("project-dir-name");
-  span_project_dir = document.getElementById("project-dir");
-  button_install_tauri = document.getElementById("install-tauri-button");
-  button_install_tauri.addEventListener("click", (e) => {
-    install_tauri();
+
+  projectDirStrong = document.getElementById("project-dir-strong-id");
+  projectDirSpan = document.getElementById("project-dir-span-id");
+
+  installTauriButton = document.getElementById("install-tauri-button-id");
+  installTauriButton.addEventListener("click", (e) => {
+    installTauri();
   });
-  button_create_project = document.getElementById("create-project-button");
-  button_create_project.addEventListener("click", (e) => {
-    create_project();
+
+  createProjectButton = document.getElementById("create-project-button-id");
+  createProjectButton.addEventListener("click", (e) => {
+    createProject();
   });
-  button_open_project = document.getElementById("open-project-button");
-  button_open_project.addEventListener("click", (e) => {
-    open_project();
+
+  openProjectButton = document.getElementById("open-project-button-id");
+  openProjectButton.addEventListener("click", (e) => {
+    openProject();
   });
-  document.getElementById("dev-button").addEventListener("click", (e) => {
+
+  document.getElementById("dev-button-id").addEventListener("click", (e) => {
     dev();
   });
-  document.getElementById("build-button").addEventListener("click", (e) => {
+  document.getElementById("build-button-id").addEventListener("click", (e) => {
     build();
   });
-  document.getElementById("info-button").addEventListener("click", (e) => {
+  document.getElementById("info-button-id").addEventListener("click", (e) => {
     info();
+  });
+
+  listen("show-container", (event) => {
+    containerMain.style.display = "flex";
   });
 });
