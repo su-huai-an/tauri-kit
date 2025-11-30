@@ -5,6 +5,14 @@ description = "A basic GUI for Tauri development"
 authors = ["苏怀安"]
 edition = "2021"
 
+[package.metadata.generate-rpm]
+name = "tauri-kit"
+version = "0.1.0"
+summary = "A basic GUI for Tauri development"
+description = "A basic GUI for Tauri development"
+authors = ["苏怀安"]
+license = "AGPL-3.0-or-later"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]

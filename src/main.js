@@ -43,7 +43,7 @@ const LANGUAGE_STRS = [
     "创建新项目",//3
     "打开项目",//4
     "你想在哪里创建新项目？",//5
-    "新项目创建完成，请手动打开它",//6
+    "新项目创建完成，请手动打开它",//6！
     "路径'",//7
     "'不存在！",//8
     "路径'",//9
@@ -60,7 +60,7 @@ let projectOpened = false;
 
 let containerMain;
 let changeLanguageButton;
-let installTauriButton;
+// let installTauriButton;
 let projectDirStrong;
 let projectDirSpan;
 let createProjectButton;
@@ -70,16 +70,17 @@ async function changeLanguage() {
   invoke("change_language");
   languageIndex = (languageIndex + 1) % 2;
   changeLanguageButton.value = LANGUAGE_STRS[languageIndex][0];
-  installTauriButton.value = LANGUAGE_STRS[languageIndex][1];
+  // installTauriButton.value = LANGUAGE_STRS[languageIndex][1];
   projectDirStrong.textContent = LANGUAGE_STRS[languageIndex][2];
+  projectDirSpan.textContent = LANGUAGE_STRS[languageIndex][12];
   createProjectButton.value = LANGUAGE_STRS[languageIndex][3];
   openProjectButton.value = LANGUAGE_STRS[languageIndex][4];
 }
 
-async function installTauri() {
-  containerMain.style.display = "none";
-  invoke("install_tauri");
-}
+// async function installTauri() {
+//   containerMain.style.display = "none";
+//   invoke("install_tauri");
+// }
 
 async function createProject() {
   containerMain.style.display = "none";
@@ -96,7 +97,7 @@ async function createProject() {
   let ret = await invoke("create_project", { "pathStr": path });
   if (ret === null) {
     projectOpened = false;
-    projectDirSpan.textContent = LANGUAGE_STRS[languageIndex][6];
+    projectDirSpan.textContent = LANGUAGE_STRS[languageIndex][12];
   } else {
     if (ret === ERROR_PATH_NOT_EXIST) {
       alert(LANGUAGE_STRS[languageIndex][7]+path+LANGUAGE_STRS[languageIndex][8]);
@@ -163,10 +164,10 @@ window.addEventListener("DOMContentLoaded", () => {
   projectDirStrong = document.getElementById("project-dir-strong-id");
   projectDirSpan = document.getElementById("project-dir-span-id");
 
-  installTauriButton = document.getElementById("install-tauri-button-id");
-  installTauriButton.addEventListener("click", (e) => {
-    installTauri();
-  });
+  // installTauriButton = document.getElementById("install-tauri-button-id");
+  // installTauriButton.addEventListener("click", (e) => {
+  //   installTauri();
+  // });
 
   createProjectButton = document.getElementById("create-project-button-id");
   createProjectButton.addEventListener("click", (e) => {
